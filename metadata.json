@@ -1,0 +1,5 @@
+{
+  "name": "CallMind AI",
+  "description": "Validation landing page for an AI phone assistant that answers, summarizes, and translates calls.",
+  "requestFramePermissions": []
+}
