@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { DemoSection } from './components/DemoSection';
@@ -60,6 +61,8 @@ const App: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         initialEmail={capturedEmail}
       />
+      
+      <Analytics />
     </div>
   );
 };
