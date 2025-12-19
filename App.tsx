@@ -25,7 +25,9 @@ const App: React.FC = () => {
       <Header />
       
       <main>
-        <Hero onJoinWaitlist={handleOpenWaitlist} />
+        <div id="top">
+          <Hero onJoinWaitlist={handleOpenWaitlist} />
+        </div>
         <Credibility />
         <Features />
         <DemoSection />
@@ -33,13 +35,20 @@ const App: React.FC = () => {
           <FAQ />
         </div>
 
-        <section className="py-20 relative overflow-hidden">
-           <div className="absolute inset-0 bg-brand-900/20"></div>
+        <section className="py-24 relative overflow-hidden border-t border-slate-900">
+           <div className="absolute inset-0 bg-brand-900/10"></div>
            <div className="container mx-auto px-6 relative z-10 text-center">
-              <h2 className="text-4xl font-bold mb-6 text-white">Reclaim 2h/week of manual work</h2>
-              <p className="text-slate-300 mb-8 max-w-xl mx-auto">
-                Join the beta today. 50% off for the first 200 users for the first month.
-              </p>
+              <h2 className="text-4xl font-bold mb-4 text-white">Reclaim 2h/week of manual work</h2>
+              
+              <div className="mb-8">
+                <p className="text-2xl font-bold text-[#00d9ff] mb-1">
+                  $19/mo → $9.50/mo
+                </p>
+                <p className="text-slate-400 text-sm font-medium">
+                  (50% OFF FOR THE FIRST 200 USERS FOR THE FIRST MONTH)
+                </p>
+              </div>
+
               <div className="flex justify-center">
                  <Button size="lg" onClick={() => handleOpenWaitlist('')}>
                     Get Early Access

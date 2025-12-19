@@ -53,11 +53,10 @@ export const Features: React.FC = () => {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl font-bold text-white mb-4">Core MVP Features</h2>
           <p className="text-slate-400">
-            Three features only. Built for founders who get 10+ calls a week and miss 30% of them.
+            Advanced AI capabilities built for founders who get 10+ calls a week and miss 30% of them.
           </p>
         </div>
 
-        {/* Optimized grid for consistency across all 5 tiles */}
         <div 
           className="grid gap-6 max-w-7xl mx-auto" 
           style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}

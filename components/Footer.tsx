@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Logo } from './Logo';
 
 interface FooterProps {
   onLogoClick?: () => void;
@@ -23,14 +24,11 @@ export const Footer: React.FC<FooterProps> = ({ onLogoClick }) => {
       <div className="container mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-center mb-8">
           <div 
-            className="flex items-center gap-2 mb-4 md:mb-0 cursor-default select-none"
+            className="cursor-default select-none"
             onClick={handleLogoClick}
             title="Admin Login (Triple Click)"
           >
-             <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center font-bold text-white text-xl">
-               C
-             </div>
-             <span className="text-xl font-bold text-white">CallMind AI</span>
+             <Logo />
           </div>
         </div>
         
