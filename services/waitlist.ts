@@ -1,33 +1,59 @@
+
 import { WaitlistData } from '../types';
 
 const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mzznajkd';
-const STORAGE_KEY = 'callmind_waitlist_backup';
+// Local storage key for persistence
+const LOCAL_STORAGE_KEY = 'callmind_waitlist_backup';
 
 export interface ApiResponse {
   success: boolean;
   error?: 'invalid_email' | 'duplicate' | 'server_error';
 }
 
-interface StoredWaitlistData extends WaitlistData {
-  id: string;
-  createdAt: string;
-  syncedToFormspree: boolean;
-}
+/**
+ * Retrieves the local waitlist backup from localStorage
+ */
+// Added to fix "no exported member 'getWaitlist'" error in AdminDashboard.tsx
+export const getWaitlist = (): any[] => {
+  try {
+    const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    console.error('Failed to parse local waitlist', e);
+    return [];
+  }
+};
 
 /**
- * Submits user to Formspree and saves to local backup
+ * Clears the local waitlist backup from localStorage
+ */
+// Added to fix "no exported member 'clearWaitlist'" error in AdminDashboard.tsx
+export const clearWaitlist = () => {
+  localStorage.removeItem(LOCAL_STORAGE_KEY);
+};
+
+/**
+ * Helper to save entries locally for the Admin Dashboard
+ */
+const saveToLocal = (data: WaitlistData, synced: boolean) => {
+  const current = getWaitlist();
+  const newItem = {
+    ...data,
+    id: Math.random().toString(36).substring(2, 9),
+    createdAt: new Date().toISOString(),
+    syncedToFormspree: synced
+  };
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([...current, newItem]));
+};
+
+/**
+ * Submits user to Formspree
  */
 export const submitWaitlist = async (data: WaitlistData): Promise<ApiResponse> => {
-  // 1. Client-side Validation
   if (!validateEmail(data.email)) {
-    console.warn('Validation Error: Invalid email format');
     return { success: false, error: 'invalid_email' };
   }
 
-  let synced = false;
-  let result: ApiResponse = { success: false };
-
-  // 2. Submit to Formspree (The Real Email Service)
   try {
     const response = await fetch(FORMSPREE_ENDPOINT, {
       method: 'POST',
@@ -39,80 +65,33 @@ export const submitWaitlist = async (data: WaitlistData): Promise<ApiResponse> =
         email: data.email,
         use_case: data.useCase,
         willingness_to_pay: data.willingnessToPay,
+        calendly_link: data.calendlyLink,
         source: data.source,
-        _subject: `New CallMind Waitlist: ${data.email}` // Custom email subject
+        _subject: `CallMind Beta: ${data.email}`
       })
     });
 
     if (response.ok) {
-      synced = true;
-      result = { success: true };
+      // Persist locally for the Admin Dashboard after successful sync
+      saveToLocal(data, true);
+      return { success: true };
     } else {
       const resData = await response.json();
-      console.error('Formspree Error:', resData);
-      // Check if Formspree says it's a duplicate
       if (resData.error && resData.error.toLowerCase().includes('duplicate')) {
-         result = { success: false, error: 'duplicate' };
-      } else {
-         result = { success: false, error: 'server_error' };
+         return { success: false, error: 'duplicate' };
       }
+      // Save locally even if sync fails so we don't lose the lead
+      saveToLocal(data, false);
+      return { success: false, error: 'server_error' };
     }
   } catch (error) {
-    console.error('Network Error:', error);
-    result = { success: false, error: 'server_error' };
+    console.error('Waitlist Submission Error:', error);
+    // Save locally on network error
+    saveToLocal(data, false);
+    return { success: false, error: 'server_error' };
   }
-
-  // 3. Save to Local Backup
-  saveToLocalBackup(data, synced);
-
-  return result;
 };
 
-// Helper to save to local storage
-const saveToLocalBackup = (data: WaitlistData, synced: boolean) => {
-    try {
-        const current = getWaitlist();
-        // Check for duplicate email in local storage to prevent spamming list
-        const exists = current.find(u => u.email === data.email);
-        if (exists) return; 
-
-        const newItem: StoredWaitlistData = {
-            ...data,
-            id: Math.random().toString(36).substr(2, 9),
-            createdAt: new Date().toISOString(),
-            syncedToFormspree: synced
-        };
-        
-        localStorage.setItem(STORAGE_KEY, JSON.stringify([...current, newItem]));
-    } catch (e) {
-        console.error("Failed to save to local storage", e);
-    }
-}
-
-/**
- * Retrieves the local waitlist backup
- */
-export const getWaitlist = (): StoredWaitlistData[] => {
-    try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        return stored ? JSON.parse(stored) : [];
-    } catch (e) {
-        return [];
-    }
-};
-
-/**
- * Clears the local waitlist backup
- */
-export const clearWaitlist = () => {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch (e) {
-      console.error("Failed to clear local storage", e);
-    }
-};
-
-// Helper for regex validation
 export const validateEmail = (email: string): boolean => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);

@@ -2,6 +2,7 @@ export interface WaitlistData {
   email: string;
   useCase: string | null;
   willingnessToPay: number | null; // 1-5 scale
+  calendlyLink?: string; // New field from PRD
   source: string;
 }
 
